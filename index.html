@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Crypto Miner</title>
+<style>
+body{background:#0f172a;color:white;font-family:Arial;text-align:center;margin:0;}
+#top{background:#1e293b;padding:15px;}
+button{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;margin:5px;}
+.crypto{background:#1e293b;margin:5px;padding:10px;border-radius:8px;cursor:pointer;}
+.active{background:#22c55e;}
+.lock{opacity:0.4;}
+.menu{position:fixed;bottom:0;width:100%;background:#1e293b;padding:10px;}
+.page{display:none;}
+#cryptosPage,#bonusPage,#profilePage,#adminPage{display:block;}
+</style>
+</head>
+<body>
+
+<div id="top">
+<h2>💰 Баланс: $<span id="money">0</span></h2>
+<h3>Реферальный баланс: $<span id="refMoney">0</span></h3>
+<button id="mine">⛏ МАЙНИТЬ</button>
+</div>
+
+<!-- Криптовалюты -->
+<div id="cryptosPage" class="page">
+<h3>Криптовалюты</h3>
+<div id="cryptos"></div>
+</div>
+
+<!-- Бонусы и кейсы -->
+<div id="bonusPage" class="page">
+<h3>Ежедневный бонус</h3>
+<p id="bonusInfo"></p>
+<button id="getBonus">Получить бонус</button>
+<h3>Кейсы</h3>
+<button id="openCase">Открыть кейс</button>
+<p id="caseResult"></p>
+</div>
+
+<!-- Профиль -->
+<div id="profilePage" class="page">
+<h3>Профиль</h3>
+<p>ID игрока: <span id="playerId"></span></p>
+<p>Никнейм: <span id="nickname"></span></p>
+<p>Баланс: $<span id="moneyProfile">0</span></p>
+<p>Реферальный баланс: $<span id="refProfile">0</span></p>
+<input type="text" id="newNick" placeholder="Новый ник">
+<input type="file" id="avatarInput">
+<button id="saveProfile">Сохранить</button>
+<img id="avatarImg" src="" width="100">
+
+<h3>Оборудованные крипты:</h3>
+<div id="equippedCryptos"></div>
+
+<h3>Реферальные выводы</h3>
+<button id="withdrawRef">Вывести реферальный баланс</button>
+<ul id="refHistory"></ul>
+</div>
+
+<!-- Админ-панель -->
+<div id="adminPage" class="page">
+<h3>Админ-панель (локально)</h3>
+<p>Вы владелец — здесь можно управлять игрой</p>
+
+<h4>Баланс игрока</h4>
+<input type="number" id="adminMoney" placeholder="Сумма для выдачи">
+<button id="addMoney">Выдать деньги</button>
+<button id="subtractMoney">Снять деньги</button>
+<button id="resetProgress">Сбросить прогресс</button>
+
+<h4>Изменить курс крипты</h4>
+<select id="cryptoSelect"></select>
+<input type="number" id="newProfit" placeholder="Новая прибыль">
+<button id="changeProfit">Изменить курс</button>
+
+<h4>Реферальные данные</h4>
+<p>Реферальный баланс игрока: $<span id="adminRefMoney">0</span></p>
+<ul id="adminRefHistory"></ul>
+</div>
+
+<!-- Меню -->
+<div class="menu">
+<button onclick="openPage('cryptosPage')">Крипта</button>
+<button onclick="openPage('bonusPage')">Бонусы/Кейсы</button>
+<button onclick="openPage('profilePage')">Профиль</button>
+<button onclick="openPage('adminPage')">Админ</button>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
