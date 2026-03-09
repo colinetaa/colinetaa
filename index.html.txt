@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Miner</title>
+
+<style>
+body{
+margin:0;
+background:#1e2238;
+font-family:Arial;
+color:white;
+text-align:center;
+}
+
+#balance{
+position:fixed;
+top:15px;
+right:15px;
+font-size:28px;
+background:#2a2f4d;
+padding:10px 20px;
+border-radius:10px;
+}
+
+#grid{
+margin-top:100px;
+display:grid;
+grid-template-columns:repeat(5,80px);
+gap:10px;
+justify-content:center;
+}
+
+.cell{
+width:80px;
+height:80px;
+font-size:30px;
+border:none;
+border-radius:10px;
+background:#2f3355;
+color:white;
+cursor:pointer;
+}
+
+.controls{
+margin-top:30px;
+}
+
+input,select{
+width:220px;
+padding:12px;
+font-size:20px;
+margin:6px;
+border-radius:8px;
+border:none;
+}
+
+button{
+width:220px;
+padding:14px;
+font-size:22px;
+margin:6px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+.play{background:#4caf50;}
+.cash{background:#ff9800;}
+
+#profitBox{
+margin-top:20px;
+font-size:24px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="balance">Баланс: $<span id="money">1000</span></div>
+
+<div id="grid"></div>
+
+<div class="controls">
+
+<input id="bet" type="number" placeholder="Введите ставку">
+
+<br>
+
+<select id="mines">
+<option value="2">2 мины</option>
+<option value="3">3 мины</option>
+<option value="5">5 мин</option>
+<option value="8">8 мин</option>
+<option value="10">10 мин</option>
+<option value="12">12 мин</option>
+</select>
+
+<br>
+
+<button class="play" onclick="startGame()">Играть</button>
+
+<button class="cash" onclick="cashout()">Забрать</button>
+
+</div>
+
+<div id="profitBox">
+Можно забрать: $<span id="profit">0</span>
+</div>
+
+<script>
+
+let balance = localStorage.getItem("minerBalance");
+
+if(balance === null){
+balance = 1000;
+}else{
+balance = Number(balance);
+}
+
+let bet = 0;
+let mines = [];
+let mineCount = 3;
+let active = false;
+let opened = 0;
+
+const grid = document.getElementById("grid");
+
+function updateBalance(){
+
+if(balance <= 0){
+balance = 100;
+alert("Баланс пополнен до $100");
+}
+
+document.getElementById("money").innerText = balance;
+
+localStorage.setItem("minerBalance", balance);
+
+}
+
+function createGrid(){
+
+grid.innerHTML = "";
+
+for(let i=0;i<25;i++){
+
+let cell = document.createElement("button");
+
+cell.className="cell";
+
+cell.onclick = function(){
+openCell(i,cell);
+}
+
+grid.appendChild(cell);
+
+}
+
+}
+
+function startGame(){
+
+bet = Number(document.getElementById("bet").value);
+
+mineCount = Number(document.getElementById("mines").value);
+
+if(!bet || bet <= 0){
+alert("Введите ставку");
+return;
+}
+
+if(bet > balance){
+alert("Недостаточно денег");
+return;
+}
+
+balance -= bet;
+
+updateBalance();
+
+opened = 0;
+
+document.getElementById("profit").innerText = bet;
+
+mines = [];
+
+while(mines.length < mineCount){
+
+let r = Math.floor(Math.random()*25);
+
+if(!mines.includes(r)){
+mines.push(r);
+}
+
+}
+
+active = true;
+
+createGrid();
+
+}
+
+function openCell(i,cell){
+
+if(!active) return;
+
+if(cell.innerText !== "") return;
+
+if(mines.includes(i)){
+
+cell.innerText="💣";
+cell.style.background="red";
+
+alert("Вы проиграли");
+
+active=false;
+
+return;
+
+}
+
+cell.innerText="💎";
+cell.style.background="green";
+
+opened++;
+
+let win = bet * (1 + opened * 0.35);
+
+document.getElementById("profit").innerText = win.toFixed(2);
+
+}
+
+function cashout(){
+
+if(!active) return;
+
+let win = Number(document.getElementById("profit").innerText);
+
+balance += win;
+
+updateBalance();
+
+alert("Вы забрали $"+win);
+
+active=false;
+
+}
+
+createGrid();
+
+updateBalance();
+
+</script>
+
+</body>
+</html>
