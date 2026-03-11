@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case Game</title>
+
+<style>
+
+body{
+margin:0;
+background:black;
+color:white;
+font-family:Arial;
+}
+
+/* верх */
+
+.top{
+display:flex;
+justify-content:space-between;
+padding:20px;
+}
+
+.left{
+display:flex;
+flex-direction:column;
+gap:15px;
+}
+
+.btn{
+background:linear-gradient(45deg,blue,red);
+border:none;
+color:white;
+font-size:22px;
+padding:15px 25px;
+border-radius:12px;
+}
+
+#balance{
+font-size:26px;
+border:3px solid white;
+padding:15px 20px;
+border-radius:12px;
+}
+
+/* рулетка */
+
+.caseBox{
+width:90%;
+height:340px;
+margin:auto;
+margin-top:20px;
+border:3px dashed white;
+border-radius:15px;
+overflow:hidden;
+position:relative;
+}
+
+.line{
+position:absolute;
+top:50%;
+left:0;
+right:0;
+height:4px;
+background:red;
+z-index:10;
+display:none;
+}
+
+.roulette{
+position:absolute;
+width:100%;
+}
+
+.item{
+height:80px;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:22px;
+}
+
+/* кнопка */
+
+#open{
+margin-top:30px;
+display:block;
+margin-left:auto;
+margin-right:auto;
+font-size:28px;
+padding:18px 80px;
+border-radius:15px;
+border:none;
+background:linear-gradient(45deg,blue,red);
+color:white;
+}
+
+/* модалки */
+
+.modal{
+position:fixed;
+top:0;
+left:0;
+right:0;
+bottom:0;
+background:black;
+display:none;
+flex-direction:column;
+padding:20px;
+overflow:auto;
+}
+
+.card{
+background:#111;
+padding:15px;
+margin:10px 0;
+border-radius:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+font-size:20px;
+}
+
+.caseBtns{
+display:flex;
+gap:10px;
+}
+
+.infoBtn{
+background:purple;
+border:none;
+color:white;
+padding:6px 12px;
+border-radius:8px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="top">
+
+<div class="left">
+<button class="btn" onclick="showCases()">ВИДЫ КЕЙСОВ</button>
+<button class="btn" onclick="openInventory()">ИНВЕНТАРЬ</button>
+</div>
+
+<div id="balance">Баланс: 0 ₽</div>
+
+</div>
+
+
+<div class="caseBox">
+<div class="line" id="line"></div>
+<div id="roulette" class="roulette"></div>
+</div>
+
+<button id="open" onclick="openCase()">ОТКРЫТЬ</button>
+
+<div id="cases" class="modal"></div>
+<div id="inventory" class="modal"></div>
+
+<script>
+
+/* баланс */
+
+let balance=parseInt(localStorage.getItem("balance"))||1000
+let inventory=JSON.parse(localStorage.getItem("inventory"))||[]
+
+function save(){
+localStorage.setItem("balance",balance)
+localStorage.setItem("inventory",JSON.stringify(inventory))
+updateBalance()
+}
+
+function updateBalance(){
+document.getElementById("balance").innerText="Баланс: "+balance+" ₽"
+}
+
+/* кейсы */
+
+let currentCase="обычный"
+
+const prices={
+обычный:50,
+редкий:250,
+мифический:1500,
+платиновый:2500,
+призматический:12000,
+million:1000000
+}
+
+const cases={
+
+обычный:[
+{v:1,c:20},
+{v:5,c:25},
+{v:10,c:25},
+{v:50,c:20},
+{v:100,c:10}
+],
+
+редкий:[
+{v:50,c:30},
+{v:100,c:30},
+{v:500,c:25},
+{v:1000,c:15}
+],
+
+мифический:[
+{v:1000,c:60},
+{v:2000,c:30},
+{v:5000,c:10}
+],
+
+платиновый:[
+{v:2500,c:30},
+{v:5000,c:25},
+{v:10000,c:20},
+{v:15000,c:15},
+{v:25000,c:10}
+],
+
+призматический:[
+{v:10000,c:30},
+{v:12000,c:25},
+{v:15000,c:20},
+{v:25000,c:15},
+{v:50000,c:7},
+{v:100000,c:3}
+],
+
+million:[
+{v:1000000,c:40},
+{v:2000000,c:25},
+{v:5000000,c:18},
+{v:10000000,c:12},
+{v:25000000,c:5}
+]
+
+}
+
+/* выбор по шансам */
+
+function getItem(type){
+
+let rand=Math.random()*100
+let sum=0
+
+for(let i of cases[type]){
+sum+=i.c
+if(rand<=sum) return i.v
+}
+
+return cases[type][0].v
+
+}
+
+/* кейсы */
+
+function showCases(){
+
+let m=document.getElementById("cases")
+m.style.display="flex"
+m.innerHTML="<h1>Кейсы</h1>"
+
+for(let c in prices){
+
+let d=document.createElement("div")
+d.className="card"
+
+d.innerHTML=`
+<span>${c} (${prices[c]} ₽)</span>
+<div class="caseBtns">
+<button onclick="selectCase('${c}')">Выбрать</button>
+<button class="infoBtn" onclick="info('${c}')">ℹ️</button>
+</div>
+`
+
+m.appendChild(d)
+
+}
+
+}
+
+function selectCase(c){
+currentCase=c
+document.getElementById("cases").style.display="none"
+}
+
+function info(c){
+
+let text="Содержимое кейса:\n\n"
+
+cases[c].forEach(i=>{
+text+=i.v+" ₽ — "+i.c+"%\n"
+})
+
+alert(text)
+
+}
+
+/* инвентарь */
+
+function openInventory(){
+
+let m=document.getElementById("inventory")
+m.style.display="flex"
+m.innerHTML="<h1>Инвентарь</h1>"
+
+inventory.forEach((i,index)=>{
+
+let d=document.createElement("div")
+d.className="card"
+
+d.innerHTML=i+" ₽ <button onclick='sell("+index+")'>Продать</button>"
+
+m.appendChild(d)
+
+})
+
+let close=document.createElement("button")
+close.className="btn"
+close.innerText="Закрыть"
+close.onclick=()=>m.style.display="none"
+
+m.appendChild(close)
+
+}
+
+function sell(i){
+
+balance+=parseInt(inventory[i])
+inventory.splice(i,1)
+
+save()
+openInventory()
+
+}
+
+/* открыть */
+
+function openCase(){
+
+if(balance<prices[currentCase]){
+alert("Недостаточно денег")
+return
+}
+
+document.getElementById("line").style.display="block"
+
+balance-=prices[currentCase]
+save()
+
+spin()
+
+}
+
+/* рулетка */
+
+function spin(){
+
+let roul=document.getElementById("roulette")
+roul.innerHTML=""
+
+let win=getItem(currentCase) // фиксируем выигрыш
+
+let list=[]
+
+for(let i=0;i<30;i++){
+
+let val
+if(i===15){
+val = win // центр рулетки — это выигрыш
+}else{
+val = getItem(currentCase)
+while(val===win && Math.random()<0.5){
+    val = getItem(currentCase)
+}
+
+}
+
+list.push(val)
+
+let div=document.createElement("div")
+div.className="item"
+div.innerText=val+" ₽"
+
+roul.appendChild(div)
+
+}
+
+let pos=0
+let speed=30
+
+function animate(){
+
+pos+=speed
+roul.style.transform="translateY(-"+pos+"px)"
+
+speed*=0.97
+
+if(speed>1){
+
+requestAnimationFrame(animate)
+
+}else{
+
+inventory.push(win)
+save()
+
+setTimeout(()=>{
+
+alert("Выпало "+win+" ₽")
+document.getElementById("line").style.display="none"
+
+},700)
+
+}
+
+}
+
+animate()
+
+}
+
+updateBalance()
+
+</script>
+
+</body>
+</html>
